@@ -1,25 +1,42 @@
+"""
+This script triggers the data processor API.
+"""
+
+import logging
 import requests
-import os
+
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Data Processor API configuration
-api_endpoint = 'http://localhost:5000/process_sales_data'
+API_URL = 'http://localhost:5000/process_sales_data'
 
 
-def trigger_api(api_endpoint):
+def trigger_api(api_url):
+    """
+    Triggers the data processor API.
+
+    Args:
+        api_url (str): The URL of the API endpoint.
+
+    Returns:
+        bool: True if the API was triggered successfully, False otherwise.
+    """
     try:
         # Trigger API
-        response = requests.get(api_endpoint)
+        response = requests.get(api_url, timeout=5, verify=False)
         response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
 
-        print(f"API triggered successfully. Response: {response.text}")
-    except Exception as e:
-        print(f"Error triggering API: {e}")
+        logging.info("API triggered successfully. Response: %s", response.text)
+    except requests.exceptions.RequestException as exc:
+        logging.error("Error triggering API: %s", exc)
         return False
     return True
 
 
 if __name__ == "__main__":
-    if trigger_api(api_endpoint):
-        print("API triggered successfully")
+    if trigger_api(API_URL):
+        logging.info("API triggered successfully")
     else:
-        print("API trigger failed")
+        logging.error("API trigger failed")
