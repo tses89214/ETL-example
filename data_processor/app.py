@@ -32,6 +32,11 @@ try:
     minio_client.head_bucket(Bucket=bucket_name)
     print(f"Bucket '{bucket_name}' exists")
 
+except Exception as e:
+    print(f"MinIO client initialization failed: {e}")
+
+print("Initializing Mysql client")
+try:
     # Connect to MySQL database
     db = mysql.connector.connect(
         host=db_host,
@@ -41,7 +46,7 @@ try:
     )
 
 except Exception as e:
-    print(f"MinIO or Mysql client initialization failed: {e}")
+    print(f"Mysql client initialization failed: {e}")
 
 
 @app.route('/process_sales_data', methods=['GET'])
