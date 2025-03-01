@@ -13,6 +13,8 @@ services:
       - ./minio:/data
     command: server /data --console-address ":9001"
 
+  # We should use environment variables for the passwords
+  # but for simplicity, we just hardcode passwords here.
   mysql:
     image: mysql:8.0
     ports:
