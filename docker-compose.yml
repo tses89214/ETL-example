@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: "minioadmin"
+      MINIO_ROOT_PASSWORD: "minioadmin"
+    volumes:
+      - ./minio:/data
+    command: server /data --console-address ":9001"
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: "sales_db"
+      MYSQL_USER: "sales_user"
+      MYSQL_PASSWORD: "password"
+    volumes:
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+        test: ["CMD", "mysql", "-u", "sales_user", "-ppassword", "-e", "SELECT 1 FROM sales_db.sales_data"]
+        interval: 10s
+        retries: 5
+        start_period: 15s
+
+
+  data_processor:
+    build: ./data_processor
+    ports:
+      - "5000:5000"
+    environment:
+      MYSQL_HOST: "mysql"
+      MYSQL_USER: "sales_user"
+      MYSQL_PASSWORD: "password"
+      MYSQL_DATABASE: "sales_db"
+      MINIO_ENDPOINT: "minio:9000"
+      MINIO_ACCESS_KEY: "minioadmin"
+      MINIO_SECRET_KEY: "minioadmin"
+      PYTHONUNBUFFERED: "1"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      minio:
+        condition: service_started
+
+networks:
+  default:
+    name: etl_network

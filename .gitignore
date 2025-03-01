@@ -169,3 +169,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+# we store doccker contianer data here
+minio/* 
